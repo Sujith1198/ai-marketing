@@ -22,10 +22,23 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Public Click Tracking Route (UTM Builder & Instant Redirect)
+| Public Click Tracking & Server Migration Helper Routes
 |--------------------------------------------------------------------------
 */
 Route::get('/go/{trackingCode}', [ClickTrackingController::class, 'redirect'])->name('tracking.redirect');
+
+Route::get('/migrate-production', function () {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate:fresh', [
+            '--force' => true,
+            '--seed' => true,
+        ]);
+        $output = \Illuminate\Support\Facades\Artisan::output();
+        return "<div style='font-family: sans-serif; padding: 2rem;'><h1 style='color:#16a34a;'>SUCCESS: Server Database Migrated & Seeded!</h1><pre style='background:#f1f5f9; padding: 1rem; border-radius: 6px;'>{$output}</pre><br><a href='/login' style='background:#2563eb; color:white; padding:0.75rem 1.5rem; text-decoration:none; border-radius:6px;'>Go to CEO Sign In</a></div>";
+    } catch (\Exception $e) {
+        return "<div style='font-family: sans-serif; padding: 2rem;'><h1 style='color:#dc2626;'>Migration Error Notice:</h1><pre style='background:#fef2f2; color:#991b1b; padding: 1rem; border-radius: 6px;'>" . $e->getMessage() . "</pre></div>";
+    }
+});
 
 /*
 |--------------------------------------------------------------------------
