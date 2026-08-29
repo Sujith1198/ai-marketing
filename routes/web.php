@@ -1,0 +1,118 @@
+<?php
+
+use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\AIProviderController;
+use App\Http\Controllers\AITeamChatController;
+use App\Http\Controllers\AITeamController;
+use App\Http\Controllers\AffiliateNetworkController;
+use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\ApprovalController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\CampaignController;
+use App\Http\Controllers\ClickTrackingController;
+use App\Http\Controllers\CredentialVaultController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\OpportunityController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\SocialAccountController;
+use App\Http\Controllers\SystemHealthController;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Public Click Tracking Route (UTM Builder & Instant Redirect)
+|--------------------------------------------------------------------------
+*/
+Route::get('/go/{trackingCode}', [ClickTrackingController::class, 'redirect'])->name('tracking.redirect');
+
+/*
+|--------------------------------------------------------------------------
+| Guest Authentication Routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware('guest')->group(function () {
+    Route::get('/', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/', [AuthController::class, 'login']);
+    Route::get('/login', [AuthController::class, 'showLogin']);
+    Route::post('/login', [AuthController::class, 'login']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Protected SaaS Operating System Routes (CEO Admin)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->group(function () {
+    Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
+    Route::match(['post', 'put'], '/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
+
+    // SaaS Core Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // AI Team & Multi-Agent Meeting Console
+    Route::get('/ai-team', [AITeamController::class, 'index'])->name('ai-team.index');
+    Route::get('/ai-team/{agent}/edit', [AITeamController::class, 'edit'])->name('ai-team.edit');
+    Route::match(['post', 'put'], '/ai-team/{agent}', [AITeamController::class, 'update'])->name('ai-team.update');
+    Route::match(['get', 'post'], '/ai-team/{agent}/toggle', [AITeamController::class, 'toggleStatus'])->name('ai-team.toggle');
+
+    Route::get('/ai-team/chat', [AITeamChatController::class, 'index'])->name('ai-team.chat');
+    Route::get('/ai-team/chat/{meeting}', [AITeamChatController::class, 'show'])->name('ai-team.chat.show');
+    Route::post('/ai-team/chat', [AITeamChatController::class, 'startMeeting'])->name('ai-team.chat.start');
+    Route::match(['get', 'post'], '/ai-team/chat/{meeting}/respond', [AITeamChatController::class, 'respond'])->name('ai-team.chat.respond');
+
+    // Product Opportunity Center & Product Manager
+    Route::get('/opportunities', [OpportunityController::class, 'index'])->name('opportunities.index');
+
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+    Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+    Route::match(['get', 'post'], '/products/{product}/analyze', [ProductController::class, 'analyze'])->name('products.analyze');
+
+    // Affiliate Networks
+    Route::get('/affiliates', [AffiliateNetworkController::class, 'index'])->name('affiliates.index');
+    Route::match(['post', 'put'], '/affiliates/{network}', [AffiliateNetworkController::class, 'update'])->name('affiliates.update');
+
+    // Campaign Manager & Creation Wizard
+    Route::get('/campaigns', [CampaignController::class, 'index'])->name('campaigns.index');
+    Route::get('/campaigns/wizard', [CampaignController::class, 'wizard'])->name('campaigns.wizard');
+    Route::post('/campaigns/wizard', [CampaignController::class, 'storeWizard'])->name('campaigns.wizard.store');
+    Route::get('/campaigns/{campaign}', [CampaignController::class, 'show'])->name('campaigns.show');
+
+    // Central Human Approval Center
+    Route::get('/approvals', [ApprovalController::class, 'index'])->name('approvals.index');
+    Route::match(['get', 'post'], '/approvals/{approval}/approve', [ApprovalController::class, 'approve'])->name('approvals.approve');
+    Route::match(['get', 'post'], '/approvals/{approval}/reject', [ApprovalController::class, 'reject'])->name('approvals.reject');
+    Route::match(['get', 'post'], '/approvals/bulk-approve', [ApprovalController::class, 'bulkApprove'])->name('approvals.bulk-approve');
+
+    // Content Calendar & Scheduler
+    Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
+
+    // Social Account Management
+    Route::get('/social-accounts', [SocialAccountController::class, 'index'])->name('social-accounts.index');
+    Route::get('/social-accounts/{platform}/connect', [SocialAccountController::class, 'connect'])->name('social-accounts.connect');
+    Route::match(['get', 'post'], '/social-accounts/{account}/disconnect', [SocialAccountController::class, 'disconnect'])->name('social-accounts.disconnect');
+
+    // Analytics Dashboard
+    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+
+    // AI Provider Manager & Fallback Chain
+    Route::get('/providers', [AIProviderController::class, 'index'])->name('providers.index');
+    Route::match(['post', 'put'], '/providers/{provider}', [AIProviderController::class, 'update'])->name('providers.update');
+    Route::match(['get', 'post'], '/providers/{provider}/test', [AIProviderController::class, 'testConnection'])->name('providers.test');
+
+    // Secure API Credential Vault (AES-256-GCM)
+    Route::get('/vault', [CredentialVaultController::class, 'index'])->name('vault.index');
+    Route::post('/vault', [CredentialVaultController::class, 'store'])->name('vault.store');
+    Route::match(['post', 'put'], '/vault/{credential}/replace', [CredentialVaultController::class, 'replace'])->name('vault.replace');
+    Route::match(['get', 'post', 'delete'], '/vault/{credential}', [CredentialVaultController::class, 'destroy'])->name('vault.destroy');
+
+    // Audit Trail Logs & System Health Diagnostics
+    Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+    Route::get('/system/health', [SystemHealthController::class, 'index'])->name('system.health');
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
+});
