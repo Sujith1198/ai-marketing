@@ -35,14 +35,17 @@ try {
     if (!file_exists($baseDir . '/bootstrap/app.php')) {
         throw new Exception("bootstrap/app.php missing!");
     }
+    
+    /** @var \Illuminate\Foundation\Application $app */
     $app = require_once $baseDir . '/bootstrap/app.php';
 
-    // Force APP_DEBUG to true in runtime config for detailed exception dump
-    config(['app.debug' => true]);
+    $appEnv = $_ENV['APP_ENV'] ?? getenv('APP_ENV') ?? 'production';
+    $dbHost = $_ENV['DB_HOST'] ?? getenv('DB_HOST') ?? 'unknown';
+    $dbName = $_ENV['DB_DATABASE'] ?? getenv('DB_DATABASE') ?? 'unknown';
 
     echo "<div class='card'><h3 class='ok'>✓ Laravel Application Bootstrapped Cleanly</h3>";
-    echo "<p>Environment: <code>" . config('app.env') . "</code> | Debug Mode: <code>" . (config('app.debug') ? 'true' : 'false') . "</code></p>";
-    echo "<p>Database Host: <code>" . config('database.connections.mysql.host') . "</code> | Database Name: <code>" . config('database.connections.mysql.database') . "</code></p>";
+    echo "<p>Environment: <code>" . htmlspecialchars($appEnv) . "</code></p>";
+    echo "<p>Database Host: <code>" . htmlspecialchars($dbHost) . "</code> | Database Name: <code>" . htmlspecialchars($dbName) . "</code></p>";
     echo "</div>";
 
     echo "<div class='card'><h3>Attempting to Dispatch Request '/login'...</h3>";
@@ -52,6 +55,7 @@ try {
     
     echo "<h4 class='ok'>✓ Dispatch Completed with HTTP Status: " . $response->getStatusCode() . "</h4>";
     if ($response->getStatusCode() >= 400) {
+        echo "<h4>Response Payload Output:</h4>";
         echo "<pre>" . htmlspecialchars(substr($response->getContent(), 0, 5000)) . "</pre>";
     }
     echo "</div>";
