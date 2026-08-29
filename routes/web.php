@@ -65,12 +65,7 @@ Route::middleware('auth')->group(function () {
     // SaaS Core Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // AI Team & Multi-Agent Meeting Console
-    Route::get('/ai-team', [AITeamController::class, 'index'])->name('ai-team.index');
-    Route::get('/ai-team/{agent}/edit', [AITeamController::class, 'edit'])->name('ai-team.edit');
-    Route::match(['post', 'put'], '/ai-team/{agent}', [AITeamController::class, 'update'])->name('ai-team.update');
-    Route::match(['get', 'post'], '/ai-team/{agent}/toggle', [AITeamController::class, 'toggleStatus'])->name('ai-team.toggle');
-
+    // AI Team Chat & Multi-Agent Meeting Console (Specific routes before wildcard)
     Route::get('/ai-team/chat', [AITeamChatController::class, 'index'])->name('ai-team.chat');
     Route::post('/ai-team/chat', [AITeamChatController::class, 'startMeeting']);
     Route::match(['get', 'post'], '/ai-team/chat-start', [AITeamChatController::class, 'startMeeting'])->name('ai-team.chat.start');
@@ -78,6 +73,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/ai-team/chat/{meeting}', [AITeamChatController::class, 'show']);
     Route::match(['get', 'post'], '/ai-team/meeting/{meeting}/respond', [AITeamChatController::class, 'respond'])->name('ai-team.chat.respond');
     Route::match(['get', 'post'], '/ai-team/chat/{meeting}/respond', [AITeamChatController::class, 'respond']);
+
+    // AI Team Agent Roster Management (Wildcard routes after specific routes)
+    Route::get('/ai-team', [AITeamController::class, 'index'])->name('ai-team.index');
+    Route::get('/ai-team/{agent}/edit', [AITeamController::class, 'edit'])->name('ai-team.edit');
+    Route::match(['post', 'put'], '/ai-team/{agent}', [AITeamController::class, 'update'])->name('ai-team.update');
+    Route::match(['get', 'post'], '/ai-team/{agent}/toggle', [AITeamController::class, 'toggleStatus'])->name('ai-team.toggle');
 
     // Affiliate Networks & Accounts
     Route::get('/affiliate-networks', [AffiliateNetworkController::class, 'index'])->name('affiliates.index');
