@@ -26,4 +26,18 @@ class SystemSetting extends Model
             ['value' => (string) $value, 'group_name' => $group, 'type' => $type]
         );
     }
+
+    public static function getSetting(string $key, $default = null)
+    {
+        $val = static::get($key);
+        if ($val === null) return $default;
+        $decoded = json_decode($val, true);
+        return (json_last_error() === JSON_ERROR_NONE && (is_array($decoded) || is_numeric($decoded))) ? $decoded : $val;
+    }
+
+    public static function setSetting(string $key, $value): void
+    {
+        $valToStore = is_array($value) ? json_encode($value) : (string)$value;
+        static::set($key, $valToStore);
+    }
 }

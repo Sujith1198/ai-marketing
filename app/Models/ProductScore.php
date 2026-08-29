@@ -12,6 +12,7 @@ class ProductScore extends Model
 
     protected $fillable = [
         'product_id',
+        'product_analysis_id',
         'demand_score',
         'buyer_intent_score',
         'competition_score',
@@ -47,6 +48,11 @@ class ProductScore extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function analysis(): BelongsTo
+    {
+        return $this->belongsTo(ProductAnalysis::class, 'product_analysis_id');
     }
 
     public function recommendationLabel(): string

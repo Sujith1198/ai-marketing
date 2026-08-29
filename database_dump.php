@@ -1,8 +1,8 @@
 <?php
 
 function get_ai_marketing_sql_dump() {
-    return '-- AI Marketing Team Complete Production SQL Dump
--- Generated with AI Meetings & Product Scores
+    return '-- AI Marketing Team Complete Phase 2 Production SQL Dump
+-- Generated with Affiliate Accounts, Product Scoring, and AI Analysis
 
 SET FOREIGN_KEY_CHECKS=0;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -20,6 +20,29 @@ CREATE TABLE `activity_logs` (
   PRIMARY KEY (`id`),
   KEY `activity_logs_user_id_foreign` (`user_id`),
   CONSTRAINT `activity_logs_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `affiliate_accounts`;
+CREATE TABLE `affiliate_accounts` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) unsigned NOT NULL,
+  `affiliate_network_id` bigint(20) unsigned NOT NULL,
+  `name` varchar(150) NOT NULL,
+  `tracking_id` varchar(150) DEFAULT NULL,
+  `status` varchar(30) NOT NULL DEFAULT \'connected\',
+  `credential_id` bigint(20) unsigned DEFAULT NULL,
+  `settings` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`settings`)),
+  `last_tested_at` timestamp NULL DEFAULT NULL,
+  `last_synced_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `affiliate_accounts_user_id_foreign` (`user_id`),
+  KEY `affiliate_accounts_affiliate_network_id_foreign` (`affiliate_network_id`),
+  KEY `affiliate_accounts_credential_id_foreign` (`credential_id`),
+  CONSTRAINT `affiliate_accounts_affiliate_network_id_foreign` FOREIGN KEY (`affiliate_network_id`) REFERENCES `affiliate_networks` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `affiliate_accounts_credential_id_foreign` FOREIGN KEY (`credential_id`) REFERENCES `api_credentials` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `affiliate_accounts_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `affiliate_clicks`;
@@ -58,11 +81,18 @@ CREATE TABLE `affiliate_networks` (
   `name` varchar(100) NOT NULL,
   `slug` varchar(100) NOT NULL,
   `driver` varchar(50) NOT NULL,
+  `status` varchar(30) NOT NULL DEFAULT \'active\',
+  `supports_api` tinyint(1) NOT NULL DEFAULT 1,
+  `supports_manual_import` tinyint(1) NOT NULL DEFAULT 1,
+  `website_url` varchar(500) DEFAULT NULL,
+  `logo` varchar(500) DEFAULT NULL,
+  `description` text DEFAULT NULL,
   `tracking_id` varchar(150) DEFAULT NULL,
   `affiliate_username` varchar(150) DEFAULT NULL,
   `portal_url` varchar(500) DEFAULT NULL,
   `credential_id` bigint(20) unsigned DEFAULT NULL,
   `capabilities` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`capabilities`)),
+  `settings` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`settings`)),
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -72,9 +102,9 @@ CREATE TABLE `affiliate_networks` (
   CONSTRAINT `affiliate_networks_credential_id_foreign` FOREIGN KEY (`credential_id`) REFERENCES `api_credentials` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `affiliate_networks` (`id`, `name`, `slug`, `driver`, `tracking_id`, `affiliate_username`, `portal_url`, `credential_id`, `capabilities`, `is_active`, `created_at`, `updated_at`) VALUES (\'1\', \'Amazon Associates\', \'amazon-associates\', \'amazon\', \'aimarketing-20\', \'amazon_affiliate_id\', \'https://affiliate-program.amazon.com\', NULL, \'[\\"product_search\\",\\"product_details\\",\\"affiliate_link_generation\\",\\"manual_import\\"]\', \'1\', \'2026-08-29 06:13:25\', \'2026-08-29 06:13:25\');
-INSERT INTO `affiliate_networks` (`id`, `name`, `slug`, `driver`, `tracking_id`, `affiliate_username`, `portal_url`, `credential_id`, `capabilities`, `is_active`, `created_at`, `updated_at`) VALUES (\'2\', \'Digistore24\', \'digistore24\', \'digistore24\', \'aimarketing\', \'digistore_affiliate_user\', \'https://www.digistore24.com\', NULL, \'[\\"product_search\\",\\"commission_data\\",\\"conversion_tracking\\",\\"manual_import\\"]\', \'1\', \'2026-08-29 06:13:25\', \'2026-08-29 06:13:25\');
-INSERT INTO `affiliate_networks` (`id`, `name`, `slug`, `driver`, `tracking_id`, `affiliate_username`, `portal_url`, `credential_id`, `capabilities`, `is_active`, `created_at`, `updated_at`) VALUES (\'3\', \'Hostinger Affiliate Program\', \'hostinger\', \'hostinger\', \'hostinger_ai\', \'hostinger_partner_user\', \'https://hpanel.hostinger.com/affiliate\', NULL, \'[\\"manual_product\\",\\"manual_affiliate_link\\",\\"manual_conversion\\"]\', \'1\', \'2026-08-29 06:13:25\', \'2026-08-29 06:13:25\');
+INSERT INTO `affiliate_networks` (`id`, `name`, `slug`, `driver`, `status`, `supports_api`, `supports_manual_import`, `website_url`, `logo`, `description`, `tracking_id`, `affiliate_username`, `portal_url`, `credential_id`, `capabilities`, `settings`, `is_active`, `created_at`, `updated_at`) VALUES (\'1\', \'Amazon Associates\', \'amazon-associates\', \'amazon\', \'active\', \'1\', \'1\', NULL, NULL, NULL, \'aimarketing-20\', \'amazon_affiliate_id\', \'https://affiliate-program.amazon.com\', NULL, \'[\\"product_search\\",\\"product_details\\",\\"affiliate_link_generation\\",\\"manual_import\\"]\', NULL, \'1\', \'2026-08-29 06:13:25\', \'2026-08-29 06:13:25\');
+INSERT INTO `affiliate_networks` (`id`, `name`, `slug`, `driver`, `status`, `supports_api`, `supports_manual_import`, `website_url`, `logo`, `description`, `tracking_id`, `affiliate_username`, `portal_url`, `credential_id`, `capabilities`, `settings`, `is_active`, `created_at`, `updated_at`) VALUES (\'2\', \'Digistore24\', \'digistore24\', \'digistore24\', \'active\', \'1\', \'1\', NULL, NULL, NULL, \'aimarketing\', \'digistore_affiliate_user\', \'https://www.digistore24.com\', NULL, \'[\\"product_search\\",\\"commission_data\\",\\"conversion_tracking\\",\\"manual_import\\"]\', NULL, \'1\', \'2026-08-29 06:13:25\', \'2026-08-29 06:13:25\');
+INSERT INTO `affiliate_networks` (`id`, `name`, `slug`, `driver`, `status`, `supports_api`, `supports_manual_import`, `website_url`, `logo`, `description`, `tracking_id`, `affiliate_username`, `portal_url`, `credential_id`, `capabilities`, `settings`, `is_active`, `created_at`, `updated_at`) VALUES (\'3\', \'Hostinger Affiliate Program\', \'hostinger\', \'hostinger\', \'active\', \'1\', \'1\', NULL, NULL, NULL, \'hostinger_ai\', \'hostinger_partner_user\', \'https://hpanel.hostinger.com/affiliate\', NULL, \'[\\"manual_product\\",\\"manual_affiliate_link\\",\\"manual_conversion\\"]\', NULL, \'1\', \'2026-08-29 06:13:25\', \'2026-08-29 06:13:25\');
 
 DROP TABLE IF EXISTS `ai_agent_runs`;
 CREATE TABLE `ai_agent_runs` (
@@ -545,7 +575,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(255) NOT NULL,
   `batch` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (\'1\', \'0001_01_01_000000_create_users_table\', \'1\');
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (\'2\', \'0001_01_01_000001_create_cache_table\', \'1\');
@@ -556,6 +586,8 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (\'6\', \'2026_01_0
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (\'7\', \'2026_01_01_000004_create_campaign_and_content_tables\', \'1\');
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (\'8\', \'2026_01_01_000005_create_social_and_scheduler_tables\', \'1\');
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (\'9\', \'2026_01_01_000006_create_analytics_and_memory_tables\', \'1\');
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (\'10\', \'2026_01_01_000007_enhance_affiliate_networks_and_accounts\', \'2\');
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (\'11\', \'2026_01_01_000008_enhance_products_and_analysis_schema\', \'2\');
 
 DROP TABLE IF EXISTS `optimization_recommendations`;
 CREATE TABLE `optimization_recommendations` (
@@ -584,6 +616,11 @@ DROP TABLE IF EXISTS `product_analyses`;
 CREATE TABLE `product_analyses` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `product_id` bigint(20) unsigned NOT NULL,
+  `analysis_version` int(10) unsigned NOT NULL DEFAULT 1,
+  `provider` varchar(50) DEFAULT NULL,
+  `model` varchar(50) DEFAULT NULL,
+  `status` varchar(30) NOT NULL DEFAULT \'completed\',
+  `confidence_score` int(10) unsigned NOT NULL DEFAULT 85,
   `market_demand` text DEFAULT NULL,
   `target_audience` text DEFAULT NULL,
   `pain_points` text DEFAULT NULL,
@@ -608,12 +645,13 @@ CREATE TABLE `product_analyses` (
   CONSTRAINT `product_analyses_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `product_analyses` (`id`, `product_id`, `market_demand`, `target_audience`, `pain_points`, `buyer_intent`, `problem_solved`, `emotional_triggers`, `competition_analysis`, `product_differentiation`, `pricing_attractiveness`, `commission_attractiveness`, `content_potential`, `viral_potential`, `seo_opportunity`, `social_media_fit`, `risk_factors`, `compliance_concerns`, `raw_ai_output`, `created_at`, `updated_at`) VALUES (\'1\', \'1\', \'High global search volume for affordable WordPress hosting & website builders.\', \'Freelancers, small business owners, affiliate marketers, and web developers.\', \'High hosting costs at SiteGround/Bluehost, complicated setup, slow site load times.\', \'High intent buyers looking for renewal discounts and free domain bundle deals.\', \'Provides lightning-fast LiteSpeed web hosting at 80% lower cost.\', \'Frustration with expensive hosting renewals, desire to start online business easily.\', \'Moderate competition on YouTube & Blogs; high potential on Instagram Reels & Pinterest.\', NULL, NULL, NULL, \'Excellent for quick video tutorials, cost comparison infographics, and speed tests.\', \'High viral potential around \\"How to build a website in 10 minutes with AI\\".\', \'Low keyword difficulty for niche long-tail terms like \\"cheapest hosting with free SSL 2026\\".\', \'Ideal for Pinterest infographics and YouTube Shorts speed benchmarks.\', \'Standard refund window policies apply.\', \'Must disclose affiliate relationship clearly in captions.\', NULL, \'2026-08-29 06:13:25\', \'2026-08-29 06:13:25\');
+INSERT INTO `product_analyses` (`id`, `product_id`, `analysis_version`, `provider`, `model`, `status`, `confidence_score`, `market_demand`, `target_audience`, `pain_points`, `buyer_intent`, `problem_solved`, `emotional_triggers`, `competition_analysis`, `product_differentiation`, `pricing_attractiveness`, `commission_attractiveness`, `content_potential`, `viral_potential`, `seo_opportunity`, `social_media_fit`, `risk_factors`, `compliance_concerns`, `raw_ai_output`, `created_at`, `updated_at`) VALUES (\'1\', \'1\', \'1\', NULL, NULL, \'completed\', \'85\', \'High global search volume for affordable WordPress hosting & website builders.\', \'Freelancers, small business owners, affiliate marketers, and web developers.\', \'High hosting costs at SiteGround/Bluehost, complicated setup, slow site load times.\', \'High intent buyers looking for renewal discounts and free domain bundle deals.\', \'Provides lightning-fast LiteSpeed web hosting at 80% lower cost.\', \'Frustration with expensive hosting renewals, desire to start online business easily.\', \'Moderate competition on YouTube & Blogs; high potential on Instagram Reels & Pinterest.\', NULL, NULL, NULL, \'Excellent for quick video tutorials, cost comparison infographics, and speed tests.\', \'High viral potential around \\"How to build a website in 10 minutes with AI\\".\', \'Low keyword difficulty for niche long-tail terms like \\"cheapest hosting with free SSL 2026\\".\', \'Ideal for Pinterest infographics and YouTube Shorts speed benchmarks.\', \'Standard refund window policies apply.\', \'Must disclose affiliate relationship clearly in captions.\', NULL, \'2026-08-29 06:13:25\', \'2026-08-29 06:13:25\');
 
 DROP TABLE IF EXISTS `product_scores`;
 CREATE TABLE `product_scores` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `product_id` bigint(20) unsigned NOT NULL,
+  `product_analysis_id` bigint(20) unsigned DEFAULT NULL,
   `demand_score` int(10) unsigned NOT NULL DEFAULT 0,
   `buyer_intent_score` int(10) unsigned NOT NULL DEFAULT 0,
   `competition_score` int(10) unsigned NOT NULL DEFAULT 0,
@@ -632,19 +670,24 @@ CREATE TABLE `product_scores` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `product_scores_product_id_foreign` (`product_id`),
+  KEY `product_scores_product_analysis_id_foreign` (`product_analysis_id`),
+  CONSTRAINT `product_scores_product_analysis_id_foreign` FOREIGN KEY (`product_analysis_id`) REFERENCES `product_analyses` (`id`) ON DELETE CASCADE,
   CONSTRAINT `product_scores_product_id_foreign` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `product_scores` (`id`, `product_id`, `demand_score`, `buyer_intent_score`, `competition_score`, `commission_score`, `content_potential_score`, `viral_potential_score`, `seo_potential_score`, `trust_score`, `social_fit_score`, `conversion_potential_score`, `risk_score`, `overall_opportunity_score`, `recommendation`, `score_breakdown`, `created_at`, `updated_at`) VALUES (\'1\', \'1\', \'90\', \'88\', \'45\', \'92\', \'88\', \'82\', \'85\', \'94\', \'90\', \'87\', \'10\', \'88\', \'STRONG_PROMOTE\', \'{\\"weighted_base\\":88.5,\\"penalties\\":0}\', \'2026-08-29 06:13:25\', \'2026-08-29 06:13:25\');
+INSERT INTO `product_scores` (`id`, `product_id`, `product_analysis_id`, `demand_score`, `buyer_intent_score`, `competition_score`, `commission_score`, `content_potential_score`, `viral_potential_score`, `seo_potential_score`, `trust_score`, `social_fit_score`, `conversion_potential_score`, `risk_score`, `overall_opportunity_score`, `recommendation`, `score_breakdown`, `created_at`, `updated_at`) VALUES (\'1\', \'1\', NULL, \'90\', \'88\', \'45\', \'92\', \'88\', \'82\', \'85\', \'94\', \'90\', \'87\', \'10\', \'88\', \'STRONG_PROMOTE\', \'{\\"weighted_base\\":88.5,\\"penalties\\":0}\', \'2026-08-29 06:13:25\', \'2026-08-29 06:13:25\');
 
 DROP TABLE IF EXISTS `products`;
 CREATE TABLE `products` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) unsigned DEFAULT NULL,
   `affiliate_network_id` bigint(20) unsigned NOT NULL,
+  `affiliate_account_id` bigint(20) unsigned DEFAULT NULL,
   `external_product_id` varchar(150) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `slug` varchar(255) NOT NULL,
   `category` varchar(100) DEFAULT NULL,
+  `subcategory` varchar(100) DEFAULT NULL,
   `brand` varchar(100) DEFAULT NULL,
   `description` text DEFAULT NULL,
   `product_url` varchar(500) NOT NULL,
@@ -658,15 +701,20 @@ CREATE TABLE `products` (
   `status` varchar(30) NOT NULL DEFAULT \'draft\',
   `source` varchar(30) NOT NULL DEFAULT \'manual\',
   `metadata` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`metadata`)),
+  `last_synced_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `products_slug_unique` (`slug`),
   KEY `products_affiliate_network_id_foreign` (`affiliate_network_id`),
-  CONSTRAINT `products_affiliate_network_id_foreign` FOREIGN KEY (`affiliate_network_id`) REFERENCES `affiliate_networks` (`id`) ON DELETE CASCADE
+  KEY `products_user_id_foreign` (`user_id`),
+  KEY `products_affiliate_account_id_foreign` (`affiliate_account_id`),
+  CONSTRAINT `products_affiliate_account_id_foreign` FOREIGN KEY (`affiliate_account_id`) REFERENCES `affiliate_accounts` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `products_affiliate_network_id_foreign` FOREIGN KEY (`affiliate_network_id`) REFERENCES `affiliate_networks` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `products_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `products` (`id`, `affiliate_network_id`, `external_product_id`, `name`, `slug`, `category`, `brand`, `description`, `product_url`, `affiliate_url`, `image_url`, `price`, `currency`, `commission_type`, `commission_value`, `commission_notes`, `status`, `source`, `metadata`, `created_at`, `updated_at`) VALUES (\'1\', \'3\', \'HST-PREM-01\', \'Hostinger Premium Web Hosting\', \'hostinger-premium-web-hosting\', \'Web Hosting & SaaS\', \'Hostinger\', \'Fast, secure, and affordable WordPress web hosting with free domain, SSL, and AI website builder.\', \'https://www.hostinger.com/web-hosting\', \'https://www.hostinger.com/web-hosting?referral=aimarketing\', \'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80\', \'2.99\', \'USD\', \'percentage\', \'60.00\', \'60% baseline commission per customer subscription.\', \'active\', \'manual\', NULL, \'2026-08-29 06:13:25\', \'2026-08-29 06:13:25\');
+INSERT INTO `products` (`id`, `user_id`, `affiliate_network_id`, `affiliate_account_id`, `external_product_id`, `name`, `slug`, `category`, `subcategory`, `brand`, `description`, `product_url`, `affiliate_url`, `image_url`, `price`, `currency`, `commission_type`, `commission_value`, `commission_notes`, `status`, `source`, `metadata`, `last_synced_at`, `created_at`, `updated_at`) VALUES (\'1\', NULL, \'3\', NULL, \'HST-PREM-01\', \'Hostinger Premium Web Hosting\', \'hostinger-premium-web-hosting\', \'Web Hosting & SaaS\', NULL, \'Hostinger\', \'Fast, secure, and affordable WordPress web hosting with free domain, SSL, and AI website builder.\', \'https://www.hostinger.com/web-hosting\', \'https://www.hostinger.com/web-hosting?referral=aimarketing\', \'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80\', \'2.99\', \'USD\', \'percentage\', \'60.00\', \'60% baseline commission per customer subscription.\', \'active\', \'manual\', NULL, NULL, \'2026-08-29 06:13:25\', \'2026-08-29 06:13:25\');
 
 DROP TABLE IF EXISTS `prompt_templates`;
 CREATE TABLE `prompt_templates` (

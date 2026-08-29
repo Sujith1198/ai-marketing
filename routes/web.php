@@ -76,18 +76,40 @@ Route::middleware('auth')->group(function () {
     Route::get('/ai-team/meeting/{meeting}', [AITeamChatController::class, 'show'])->name('ai-team.chat.show');
     Route::match(['get', 'post'], '/ai-team/meeting/{meeting}/respond', [AITeamChatController::class, 'respond'])->name('ai-team.chat.respond');
 
-    // Product Opportunity Center & Product Manager
+    // Affiliate Networks & Accounts
+    Route::get('/affiliate-networks', [AffiliateNetworkController::class, 'index'])->name('affiliates.index');
+    Route::get('/affiliates', [AffiliateNetworkController::class, 'index'])->name('affiliates.index.alias');
+    Route::match(['post', 'put'], '/affiliate-networks/{network}', [AffiliateNetworkController::class, 'update'])->name('affiliates.update');
+    
+    Route::get('/affiliate-accounts', [\App\Http\Controllers\AffiliateAccountController::class, 'index'])->name('affiliate-accounts.index');
+    Route::post('/affiliate-accounts', [\App\Http\Controllers\AffiliateAccountController::class, 'store'])->name('affiliate-accounts.store');
+    Route::post('/affiliate-accounts/{account}/test', [\App\Http\Controllers\AffiliateAccountController::class, 'testConnection'])->name('affiliate-accounts.test');
+    Route::delete('/affiliate-accounts/{account}', [\App\Http\Controllers\AffiliateAccountController::class, 'destroy'])->name('affiliate-accounts.destroy');
+
+    // Product Opportunity Center & Watchlist
     Route::get('/opportunities', [OpportunityController::class, 'index'])->name('opportunities.index');
+    Route::get('/watchlist', [\App\Http\Controllers\WatchlistController::class, 'index'])->name('watchlist.index');
+    Route::post('/watchlist/{product}/toggle', [\App\Http\Controllers\WatchlistController::class, 'toggle'])->name('watchlist.toggle');
+
+    // Product Management & Import
+    Route::get('/products/import', [\App\Http\Controllers\ProductImportController::class, 'showImportForm'])->name('products.import');
+    Route::post('/products/import', [\App\Http\Controllers\ProductImportController::class, 'processImport'])->name('products.import.process');
 
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
     Route::post('/products', [ProductController::class, 'store'])->name('products.store');
     Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
-    Route::match(['get', 'post'], '/products/{product}/analyze', [ProductController::class, 'analyze'])->name('products.analyze');
+    Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
+    Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
+    Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
 
-    // Affiliate Networks
-    Route::get('/affiliates', [AffiliateNetworkController::class, 'index'])->name('affiliates.index');
-    Route::match(['post', 'put'], '/affiliates/{network}', [AffiliateNetworkController::class, 'update'])->name('affiliates.update');
+    // Product AI Analysis & AI Review Workflows
+    Route::match(['get', 'post'], '/products/{product}/analyze', [\App\Http\Controllers\ProductAnalysisController::class, 'analyze'])->name('products.analyze');
+    Route::get('/products/{product}/analysis-history', [\App\Http\Controllers\ProductAnalysisController::class, 'history'])->name('products.analysis-history');
+    Route::get('/products/{product}/ask-ai-team', [\App\Http\Controllers\ProductAIReviewController::class, 'askAiTeam'])->name('products.ask-ai-team');
+
+    // Settings Scoring Weights
+    Route::post('/settings/scoring', [SettingsController::class, 'updateScoringWeights'])->name('settings.scoring.update');
 
     // Campaign Manager & Creation Wizard
     Route::get('/campaigns', [CampaignController::class, 'index'])->name('campaigns.index');
