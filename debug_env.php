@@ -11,8 +11,13 @@ ini_set('display_errors', '1');
 
 $baseDir = file_exists(__DIR__ . '/bootstrap') ? __DIR__ : dirname(__DIR__);
 
+// Auto-fix: Copy .env.production to .env if .env is missing or empty!
+if (!file_exists($baseDir . '/.env') && file_exists($baseDir . '/.env.production')) {
+    @copy($baseDir . '/.env.production', $baseDir . '/.env');
+}
+
 echo "<!DOCTYPE html><html><head><title>Laravel Exception Debugger</title>";
-echo "<style>body{font-family:sans-serif;background:#0f172a;color:#f8fafc;padding:2rem;} .card{background:#1e293b;border-radius:8px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 4px 6px rgba(0,0,0,0.3);} pre{background:#000;color:#00ff66;padding:1rem;overflow-x:auto;border-radius:6px;} .error{color:#f87171;} .ok{color:#4ade80;}</style></head><body>";
+echo "<style>body{font-family:sans-serif;background:#0f172a;color:#f8fafc;padding:2rem;} .card{background:#1e293b;border-radius:8px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 4px 6px rgba(0,0,0,0.3);} pre{background:#000;color:#00ff66;padding:1rem;overflow-x:auto;border-radius:6px;} .error{color:#f87171;} .ok{color:#4ade80;} code{background:#334155;padding:2px 6px;border-radius:4px;color:#cbd5e1;}</style></head><body>";
 echo "<h2>Laravel Live Exception Diagnostics</h2>";
 
 try {
@@ -21,14 +26,23 @@ try {
     }
     require $baseDir . '/vendor/autoload.php';
 
+    // Manually load Dotenv if env is empty
+    if (class_exists('Dotenv\Dotenv') && file_exists($baseDir . '/.env')) {
+        $dotenv = Dotenv\Dotenv::createImmutable($baseDir);
+        $dotenv->safeLoad();
+    }
+
     if (!file_exists($baseDir . '/bootstrap/app.php')) {
         throw new Exception("bootstrap/app.php missing!");
     }
     $app = require_once $baseDir . '/bootstrap/app.php';
 
+    // Force APP_DEBUG to true in runtime config for detailed exception dump
+    config(['app.debug' => true]);
+
     echo "<div class='card'><h3 class='ok'>✓ Laravel Application Bootstrapped Cleanly</h3>";
-    echo "<p>Environment: <code>" . env('APP_ENV') . "</code> | Debug Mode: <code>" . (env('APP_DEBUG') ? 'true' : 'false') . "</code></p>";
-    echo "<p>Database Host: <code>" . env('DB_HOST') . "</code> | Database Name: <code>" . env('DB_DATABASE') . "</code></p>";
+    echo "<p>Environment: <code>" . config('app.env') . "</code> | Debug Mode: <code>" . (config('app.debug') ? 'true' : 'false') . "</code></p>";
+    echo "<p>Database Host: <code>" . config('database.connections.mysql.host') . "</code> | Database Name: <code>" . config('database.connections.mysql.database') . "</code></p>";
     echo "</div>";
 
     echo "<div class='card'><h3>Attempting to Dispatch Request '/login'...</h3>";
@@ -38,7 +52,7 @@ try {
     
     echo "<h4 class='ok'>✓ Dispatch Completed with HTTP Status: " . $response->getStatusCode() . "</h4>";
     if ($response->getStatusCode() >= 400) {
-        echo "<pre>" . htmlspecialchars(substr($response->getContent(), 0, 3000)) . "</pre>";
+        echo "<pre>" . htmlspecialchars(substr($response->getContent(), 0, 5000)) . "</pre>";
     }
     echo "</div>";
 
