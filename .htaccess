@@ -5,12 +5,12 @@
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
-    # Direct pass-through for existing physical files (e.g. server_check.php, images, css)
+    # Direct pass-through for existing physical files (e.g. server_check.php, images, css, js)
     RewriteCond %{REQUEST_FILENAME} -f
     RewriteRule ^ - [L]
 
-    # Route all non-file sub-paths cleanly to public/index.php
+    # Route all non-file sub-paths (GET/POST/PUT/DELETE) directly to public/index.php
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^ public/index.php [L]
+    RewriteRule ^(.*)$ public/index.php [L,QSA]
 </IfModule>
