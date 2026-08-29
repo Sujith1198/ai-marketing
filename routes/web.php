@@ -72,9 +72,9 @@ Route::middleware('auth')->group(function () {
     Route::match(['get', 'post'], '/ai-team/{agent}/toggle', [AITeamController::class, 'toggleStatus'])->name('ai-team.toggle');
 
     Route::get('/ai-team/chat', [AITeamChatController::class, 'index'])->name('ai-team.chat');
-    Route::get('/ai-team/chat/{meeting}', [AITeamChatController::class, 'show'])->name('ai-team.chat.show');
-    Route::post('/ai-team/chat', [AITeamChatController::class, 'startMeeting'])->name('ai-team.chat.start');
-    Route::match(['get', 'post'], '/ai-team/chat/{meeting}/respond', [AITeamChatController::class, 'respond'])->name('ai-team.chat.respond');
+    Route::match(['get', 'post'], '/ai-team/chat-start', [AITeamChatController::class, 'startMeeting'])->name('ai-team.chat.start');
+    Route::get('/ai-team/meeting/{meeting}', [AITeamChatController::class, 'show'])->name('ai-team.chat.show');
+    Route::match(['get', 'post'], '/ai-team/meeting/{meeting}/respond', [AITeamChatController::class, 'respond'])->name('ai-team.chat.respond');
 
     // Product Opportunity Center & Product Manager
     Route::get('/opportunities', [OpportunityController::class, 'index'])->name('opportunities.index');
