@@ -43,13 +43,13 @@
         <form action="{{ route('login') }}" method="POST">
             @csrf
             <div class="mb-3">
-                <label for="email" class="form-label font-weight-semibold">CEO Email Address</label>
-                <input type="email" class="form-control" id="email" name="email" value="ceo@aimarketing.test" required autofocus>
+                <label for="email" class="form-label font-weight-semibold">Email Address</label>
+                <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" placeholder="Enter email address" required autofocus>
             </div>
 
             <div class="mb-3">
                 <label for="password" class="form-label font-weight-semibold">Password</label>
-                <input type="password" class="form-control" id="password" name="password" value="password" required>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
             </div>
 
             <div class="mb-3 form-check">
@@ -57,12 +57,8 @@
                 <label class="form-check-label text-muted small" for="remember">Remember me</label>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">Sign In as CEO</button>
+            <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">Sign In</button>
         </form>
-
-        <div class="mt-4 text-center">
-            <span class="text-muted extra-small">Default CEO Login: <strong>ceo@aimarketing.test</strong> / <strong>password</strong></span>
-        </div>
     </div>
 </body>
 </html>
